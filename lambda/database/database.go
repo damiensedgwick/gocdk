@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	TABLE_NAME = "user"
+	TABLE_NAME = "users"
 )
 
 type DynamoDBClient struct {
