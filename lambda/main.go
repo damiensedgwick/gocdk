@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"lambda-func/app"
+	"lambda-func/middleware"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -21,6 +22,13 @@ func HandleRequest(event MyEvent) (string, error) {
 	return fmt.Sprintf("Successfully called by %s", event.Username), nil
 }
 
+func ProtectedHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return events.APIGatewayProxyResponse{
+		Body:       "This is a secret path...",
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
 func main() {
 	app := app.NewApp()
 
@@ -30,6 +38,8 @@ func main() {
 			return app.ApiHandler.RegisterUserHandler(request)
 		case "/login":
 			return app.ApiHandler.LoginUser(request)
+		case "/protected":
+			return middleware.ValidateJWTMiddleware(ProtectedHandler)(request)
 		default:
 			return events.APIGatewayProxyResponse{
 				Body:       "Not Found",
